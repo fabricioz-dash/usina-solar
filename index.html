@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Usina Solar">
+<title>Usina Solar</title>
+
+<script>
+(function(){
+  const manifest = {
+    name:"Dashboard Solar",short_name:"Solar",
+    description:"Monitor da usina solar",
+    start_url:"./",display:"standalone",
+    background_color:"#0a0e14",theme_color:"#0a0e14",
+    orientation:"portrait-primary",
+    icons:[
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:"application/manifest+json"});
+  const link=document.createElement("link");link.rel="manifest";
+  link.href=URL.createObjectURL(blob);document.head.appendChild(link);
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#0a0e14;--surface:#111820;--border:#1e2d3d;
+  --accent:#f5a623;--green:#52d68a;--blue:#3db8f5;
+  --danger:#f55252;--text:#cdd9e5;--muted:#4a5568;
+  --hd:'Rajdhani',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --safe-top:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow-x:hidden;overscroll-behavior:none}
+
+/* LOCK */
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;padding:2rem;transition:opacity .4s}
+#lock.out{opacity:0;pointer-events:none}
+.lock-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);padding:2.5rem 2rem;width:100%;max-width:340px;text-align:center}
+.sun-spin{font-size:3.5rem;display:inline-block;animation:spin 25s linear infinite;margin-bottom:.75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lock-title{font-family:var(--hd);font-size:1.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.25rem}
+.lock-sub{font-size:.65rem;color:var(--muted);margin-bottom:2rem;letter-spacing:.08em}
+.lock-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:1.2rem;padding:.8rem;text-align:center;letter-spacing:.3em;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0}
+.lock-input:focus{border-color:var(--accent)}
+.lock-input.shake{border-color:var(--danger);animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.lock-btn{width:100%;margin-top:.75rem;background:var(--accent);border:none;color:#0a0e14;font-family:var(--hd);font-size:1rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.85rem;cursor:pointer;border-radius:0;-webkit-appearance:none;transition:opacity .15s}
+.lock-btn:active{opacity:.75}
+
+/* APP */
+#app{display:none;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+#app.on{display:flex;flex-direction:column}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:calc(.75rem + var(--safe-top)) 1rem .75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.hd-title{font-family:var(--hd);font-size:1.2rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.hd-title span{color:var(--text)}
+.hd-right{display:flex;align-items:center;gap:.75rem}
+.badge{display:flex;align-items:center;gap:.4rem;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.dot.online{background:var(--green);animation:blink 2.5s infinite}
+.dot.erro{background:var(--danger);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ref-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:1rem;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s}
+.ref-btn:active{color:var(--blue);border-color:var(--blue)}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.inner{padding:1rem;display:flex;flex-direction:column;gap:1rem;max-width:680px;margin:0 auto}
+
+/* KPI DESTAQUE */
+.kpi-main{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);padding:1.25rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.kpi-main-val{font-family:var(--hd);font-size:3rem;font-weight:700;color:var(--accent);line-height:1}
+.kpi-main-val small{font-size:1rem;color:var(--muted);margin-left:.3rem}
+.kpi-main-right{text-align:right}
+.kpi-lbl{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.4rem}
+.kpi-sub{font-size:.55rem;color:var(--muted);margin-top:.3rem}
+.lbl-sm{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+
+/* KPI GRID */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+.kpi{background:var(--surface);padding:1rem;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.a::after{background:var(--accent)}
+.kpi.g::after{background:var(--green)}
+.kpi.b::after{background:var(--blue)}
+.kpi-val{font-family:var(--hd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--text)}
+.kpi-val small{font-size:.7rem;color:var(--muted);font-weight:400;margin-left:.2rem}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);overflow:hidden}
+.card-hd{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-family:var(--hd);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+.card-hd span{font-size:.65rem;color:var(--blue)}
+
+/* GRÁFICOS */
+.chart-wrap{position:relative;height:200px;padding:.75rem}
+
+/* TABELA HISTÓRICO */
+.hist-table{width:100%;border-collapse:collapse}
+.hist-table th{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:.5rem .75rem;text-align:right;border-bottom:1px solid var(--border)}
+.hist-table th:first-child{text-align:left}
+.hist-table td{font-size:.7rem;padding:.45rem .75rem;text-align:right;border-bottom:1px solid #0d1117}
+.hist-table td:first-child{text-align:left;color:var(--muted);font-size:.65rem}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-table tr:hover td{background:rgba(255,255,255,.02)}
+.val-hoje{color:var(--green)}
+.val-total{color:var(--blue)}
+.val-money{color:var(--accent)}
+
+/* LOADING */
+.loading{padding:2rem;text-align:center;color:var(--muted);font-size:.75rem}
+.spin-el{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite;margin:0 auto .75rem}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* FOOTER */
+footer{text-align:center;padding:.75rem;font-size:.55rem;letter-spacing:.08em;color:var(--muted);border-top:1px solid var(--border)}
+
+/* INSTALL BANNER */
+#install-bar{display:none;background:var(--accent);color:#0a0e14;padding:.6rem 1rem;font-size:.7rem;font-family:var(--hd);letter-spacing:.08em;text-transform:uppercase;align-items:center;justify-content:space-between;position:sticky;bottom:0}
+#install-bar.show{display:flex}
+#install-bar button{background:#0a0e14;color:var(--accent);border:none;font-family:var(--hd);font-size:.7rem;padding:.3rem .75rem;cursor:pointer;letter-spacing:.08em}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab{flex:1;padding:.6rem .5rem;font-family:var(--hd);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock">
+  <div class="lock-card">
+    <div class="sun-spin">☀️</div>
+    <div class="lock-title">Usina <span style="color:var(--text)">Solar</span></div>
+    <div class="lock-sub">ACESSO RESTRITO</div>
+    <input type="password" id="pwd" class="lock-input" placeholder="••••••••" maxlength="32" autocomplete="current-password">
+    <button class="lock-btn" id="lock-btn">ENTRAR</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="hd-title">☀ <span id="plant-name">Solar</span></div>
+    <div class="hd-right">
+      <div class="badge">
+        <div class="dot" id="dot"></div>
+        <span id="status-txt">–</span>
+      </div>
+      <button class="ref-btn" id="ref-btn" title="Atualizar">↻</button>
+    </div>
+  </header>
+
+  <div class="scroll">
+    <div class="inner">
+
+      <!-- KPI: Rendimento de Hoje -->
+      <div class="kpi-main">
+        <div>
+          <div class="kpi-lbl">Rendimento de Hoje</div>
+          <div class="kpi-main-val" id="kpi-hoje">–<small>kWh</small></div>
+          <div class="kpi-sub" id="kpi-data-ref">–</div>
+        </div>
+        <div class="kpi-main-right">
+          <div class="lbl-sm">Última coleta</div>
+          <div id="kpi-ts" style="font-family:var(--hd);font-size:1rem;color:var(--text);margin-top:.2rem">–</div>
+        </div>
+      </div>
+
+      <!-- KPIs Acumulados -->
+      <div class="kpi-row">
+        <div class="kpi b">
+          <div class="kpi-lbl">Rendimento Total</div>
+          <div class="kpi-val" id="kpi-total">–<small>kWh</small></div>
+          <div class="kpi-sub">Acumulado histórico</div>
+        </div>
+        <div class="kpi a">
+          <div class="kpi-lbl">Potência Acumulada</div>
+          <div class="kpi-val" id="kpi-money">–<small style="font-size:.6rem">R$</small></div>
+          <div class="kpi-sub">Acumulado histórico</div>
+        </div>
+      </div>
+
+      <!-- KPIs derivados -->
+      <div class="kpi-row">
+        <div class="kpi g">
+          <div class="kpi-lbl">Dias coletados</div>
+          <div class="kpi-val" id="kpi-dias">–</div>
+          <div class="kpi-sub">Registros no CSV</div>
+        </div>
+        <div class="kpi g">
+          <div class="kpi-lbl">Média diária</div>
+          <div class="kpi-val" id="kpi-media">–<small>kWh</small></div>
+          <div class="kpi-sub">Últimos 30 dias</div>
+        </div>
+      </div>
+
+      <!-- Gráficos com abas -->
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" onclick="trocarAba(0)">Rendimento / Dia</button>
+          <button class="tab" onclick="trocarAba(1)">Total Acumulado</button>
+          <button class="tab" onclick="trocarAba(2)">Receita R$</button>
+        </div>
+        <div id="tab0" class="tab-panel active">
+          <div class="chart-wrap"><canvas id="chart-hoje"></canvas></div>
+        </div>
+        <div id="tab1" class="tab-panel">
+          <div class="chart-wrap"><canvas id="chart-total"></canvas></div>
+        </div>
+        <div id="tab2" class="tab-panel">
+          <div class="chart-wrap"><canvas id="chart-money"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Tabela histórico -->
+      <div class="card">
+        <div class="card-hd">Histórico <span id="hist-count"></span></div>
+        <div id="hist-body">
+          <div class="loading"><div class="spin-el"></div>Carregando...</div>
+        </div>
+      </div>
+
+    </div>
+    <footer id="footer">Dashboard Solar · Atualizado via GitHub Actions</footer>
+  </div>
+
+  <div id="install-bar">
+    ☀ Instalar como app no celular
+    <button id="install-btn">Instalar</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CONFIG — ajuste antes de usar
+// ═══════════════════════════════════════════════════════════
+// URL raw do CSV no GitHub:
+// https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/rendimento_diario.csv
+const CSV_URL = "https://raw.githubusercontent.com/fabricioz-dash/usina-solar/main/rendimento_diario.csv";
+
+// Nome exibido no header
+const NOME_USINA = "Usina Solar";
+
+// Senha: gere com: python3 -c "import hashlib;print(hashlib.sha256(b'SUASENHA').hexdigest())"
+// Padrão abaixo = "solar123"  ← TROQUE!
+const HASH_ESPERADO = "8eb6bc05a0e8f6aad8972595dbce7969343b77b61d6ecd915866a48a555db52a";
+// ═══════════════════════════════════════════════════════════
+
+// PWA install
+if ("serviceWorker" in navigator) {
+  const sw = `
+    const C="solar-csv-v1";
+    self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html"]).catch(()=>{})));self.skipWaiting();});
+    self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
+    self.addEventListener("fetch",e=>{
+      if(e.request.url.includes("raw.githubusercontent.com"))return;
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>r)));
+    });
+  `;
+  const blob=new Blob([sw],{type:"text/javascript"});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.getElementById("install-bar").classList.add("show");});
+document.getElementById("install-btn").addEventListener("click",()=>{if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById("install-bar").classList.remove("show");});});
+
+// Auth SHA-256
+async function sha256(s){
+  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function tentarLogin(){
+  const inp=document.getElementById("pwd");
+  const hash=await sha256(inp.value);
+  if(hash===HASH_ESPERADO){
+    const lock=document.getElementById("lock");
+    lock.classList.add("out");
+    setTimeout(()=>{lock.style.display="none";},500);
+    document.getElementById("app").classList.add("on");
+    document.getElementById("plant-name").textContent=NOME_USINA;
+    carregarCSV();
+  } else {
+    inp.classList.add("shake");inp.value="";
+    setTimeout(()=>inp.classList.remove("shake"),400);inp.focus();
+  }
+}
+document.getElementById("pwd").addEventListener("keydown",e=>{if(e.key==="Enter")tentarLogin();});
+document.getElementById("lock-btn").addEventListener("click",tentarLogin);
+document.getElementById("ref-btn").addEventListener("click",carregarCSV);
+
+// Utilitários
+const $=id=>document.getElementById(id);
+function fmt(v,d=2){return v==null||isNaN(v)?"–":Number(v).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function setStatus(tipo,txt){$("dot").className="dot "+tipo;$("status-txt").textContent=txt;}
+
+// Parser CSV  (separador ";", header na linha 0)
+function parseCSV(texto) {
+  const linhas = texto.trim().split("\n").filter(l=>l.trim());
+  if (linhas.length < 2) return [];
+  const header = linhas[0].split(";").map(h=>h.trim());
+  return linhas.slice(1).map(l=>{
+    const cols = l.split(";").map(c=>c.trim());
+    const obj  = {};
+    header.forEach((h,i)=>{ obj[h]=cols[i]||""; });
+    return obj;
+  }).filter(r=>r.data && r.rendimento_hoje !== "ERRO" && r.rendimento_hoje !== "ERRO_COLETA");
+}
+
+// Charts
+let charts = {};
+function mkChart(id, labels, data, color, label, tipo="line") {
+  const ctx = $(id).getContext("2d");
+  if (charts[id]) charts[id].destroy();
+  const grad = ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0, color.replace(")",", .35)").replace("rgb","rgba"));
+  grad.addColorStop(1, color.replace(")",", 0)").replace("rgb","rgba"));
+  charts[id] = new Chart(ctx, {
+    type: tipo,
+    data: {
+      labels,
+      datasets:[{
+        label,data,
+        borderColor: color,
+        backgroundColor: tipo==="line" ? grad : color.replace(")",", .6)").replace("rgb","rgba"),
+        borderWidth:2,
+        pointRadius: labels.length > 60 ? 0 : 2,
+        pointBackgroundColor: color,
+        tension: 0.3,fill:true,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:"#111820",borderColor:"#1e2d3d",borderWidth:1,
+          titleColor:"#4a5568",bodyColor:"#cdd9e5",
+          titleFont:{family:"'IBM Plex Mono'",size:10},
+          bodyFont:{family:"'IBM Plex Mono'",size:11},
+        }
+      },
+      scales:{
+        x:{ticks:{color:"#4a5568",font:{family:"'IBM Plex Mono'",size:8},maxTicksLimit:8},grid:{color:"#1e2d3d"}},
+        y:{beginAtZero:true,ticks:{color:"#4a5568",font:{family:"'IBM Plex Mono'",size:8}},grid:{color:"#1e2d3d"}}
+      }
+    }
+  });
+}
+
+// Abas
+function trocarAba(idx){
+  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===idx));
+  document.querySelectorAll(".tab-panel").forEach((p,i)=>p.classList.toggle("active",i===idx));
+}
+
+// Tabela histórico (mais recente primeiro)
+function renderTabela(rows) {
+  if (!rows.length) { $("hist-body").innerHTML=`<div class="loading">Sem dados</div>`; return; }
+  const invertido = [...rows].reverse();
+  $("hist-count").textContent = `${rows.length} registros`;
+  $("hist-body").innerHTML = `
+    <table class="hist-table">
+      <thead><tr>
+        <th>Data</th>
+        <th>Hoje (kWh)</th>
+        <th>Total (kWh)</th>
+        <th>Receita (R$)</th>
+      </tr></thead>
+      <tbody>${invertido.map(r=>`
+        <tr>
+          <td>${r.data}</td>
+          <td class="val-hoje">${fmt(r.rendimento_hoje)}</td>
+          <td class="val-total">${fmt(r.rendimento_total)}</td>
+          <td class="val-money">${fmt(r.potencia_acumulada)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+// Carrega e renderiza tudo
+async function carregarCSV(){
+  setStatus("","Buscando...");
+  try {
+    // Cache-bust para sempre pegar a versão mais nova
+    const r = await fetch(CSV_URL + "?v=" + Date.now(), {cache:"no-store"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const texto = await r.text();
+    const rows  = parseCSV(texto);
+    if (!rows.length) throw new Error("CSV vazio ou sem dados válidos");
+
+    // --- Último registro ---
+    const ultimo = rows[rows.length-1];
+    $("kpi-hoje").innerHTML  = `${fmt(ultimo.rendimento_hoje)}<small>kWh</small>`;
+    $("kpi-total").innerHTML = `${fmt(ultimo.rendimento_total)}<small>kWh</small>`;
+    $("kpi-money").innerHTML = `${fmt(ultimo.potencia_acumulada)}<small style="font-size:.6rem">R$</small>`;
+    $("kpi-data-ref").textContent = "Referente a " + ultimo.data;
+    $("kpi-ts").textContent = ultimo.data;
+    $("kpi-dias").textContent = rows.length;
+
+    // Média últimos 30 dias
+    const ult30 = rows.slice(-30).map(r=>parseFloat(r.rendimento_hoje.replace(",","."))).filter(v=>!isNaN(v));
+    const media = ult30.length ? ult30.reduce((a,b)=>a+b,0)/ult30.length : null;
+    $("kpi-media").innerHTML = `${fmt(media,1)}<small>kWh</small>`;
+
+    // Dados para gráficos — usa todas as datas se ≤90, senão últimas 90
+    const slice = rows.slice(-90);
+    const labels = slice.map(r=>r.data);
+    const dHoje  = slice.map(r=>parseFloat(r.rendimento_hoje.replace(",","."))||0);
+    const dTotal = slice.map(r=>parseFloat(r.rendimento_total.replace(",","."))||0);
+    const dMoney = slice.map(r=>parseFloat(r.potencia_acumulada.replace(",","."))||0);
+
+    mkChart("chart-hoje",  labels, dHoje,  "rgb(82,214,138)",   "kWh hoje");
+    mkChart("chart-total", labels, dTotal, "rgb(61,184,245)",   "kWh total","line");
+    mkChart("chart-money", labels, dMoney, "rgb(245,166,35)",   "R$ acumulado","line");
+
+    renderTabela(rows);
+    setStatus("online","Atualizado");
+    $("footer").textContent = `Dashboard Solar · ${NOME_USINA} · ${new Date().toLocaleDateString("pt-BR")}`;
+
+  } catch(e) {
+    setStatus("erro","Erro ao carregar");
+    $("hist-body").innerHTML=`<div class="loading" style="color:var(--danger)">
+      ⚠ Não foi possível carregar o CSV<br>
+      <small style="color:var(--muted)">${e.message}</small><br><br>
+      <small style="color:var(--muted)">Verifique a variável CSV_URL no código</small>
+    </div>`;
+  }
+}
+</script>
+</body>
+</html>
