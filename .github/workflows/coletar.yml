@@ -28,7 +28,7 @@ jobs:
 
       # 4. Dependências Python
       - name: Instalar dependências
-        run: pip install selenium
+        run: pip install selenium schedule
 
       # 5. Executar scraper (roda uma única coleta, sem o loop de agendamento)
       - name: Executar coleta
