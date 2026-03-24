@@ -13,8 +13,8 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 
 import schedule
 from selenium import webdriver
@@ -139,7 +139,8 @@ def salvar_csv(data: str, dados: dict) -> None:
 
 def executar_coleta() -> None:
     log.info("=== Iniciando coleta ===")
-    data_hoje = datetime.now().strftime("%d/%m/%Y")
+    FUSO_BRASILIA = timezone(timedelta(hours=-3))
+    data_hoje = datetime.now(FUSO_BRASILIA).strftime("%d/%m/%Y")
     driver = None
     try:
         driver = criar_driver()
