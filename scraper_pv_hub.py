@@ -13,8 +13,8 @@ import logging
 import os
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 import schedule
 from selenium import webdriver
@@ -117,13 +117,29 @@ def coletar_dados(driver, wait) -> dict:
     wait.until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "div.plant-money span"))
     )
-    time.sleep(2)
-    resultado = {}
-    for chave, titulo in CAMPOS.items():
-        valor = _valor_pelo_titulo(driver, titulo)
-        resultado[chave] = valor
-        log.info("  %-22s -> %s", chave, valor)
-    return resultado
+
+    # Aguarda os valores estabilizarem:
+    # lê, espera 5s, lê de novo — repete até 3 tentativas ou até estabilizar
+    TENTATIVAS   = 3
+    ESPERA_SEG   = 5
+
+    for tentativa in range(1, TENTATIVAS + 1):
+        leitura_a = {chave: _valor_pelo_titulo(driver, titulo) for chave, titulo in CAMPOS.items()}
+        log.info("  Leitura %d: %s", tentativa, leitura_a)
+
+        time.sleep(ESPERA_SEG)
+
+        leitura_b = {chave: _valor_pelo_titulo(driver, titulo) for chave, titulo in CAMPOS.items()}
+        log.info("  Confirmação %d: %s", tentativa, leitura_b)
+
+        if leitura_a == leitura_b:
+            log.info("  Valores estáveis após %d tentativa(s).", tentativa)
+            return leitura_b
+
+        log.info("  Valores ainda mudando, aguardando mais %ds...", ESPERA_SEG)
+
+    log.warning("  Valores não estabilizaram após %d tentativas. Usando última leitura.", TENTATIVAS)
+    return leitura_b
 
 
 def salvar_csv(data: str, dados: dict) -> None:
@@ -139,8 +155,7 @@ def salvar_csv(data: str, dados: dict) -> None:
 
 def executar_coleta() -> None:
     log.info("=== Iniciando coleta ===")
-    FUSO_BRASILIA = timezone(timedelta(hours=-3))
-    data_hoje = datetime.now(FUSO_BRASILIA).strftime("%d/%m/%Y")
+    data_hoje = datetime.now().strftime("%d/%m/%Y")
     driver = None
     try:
         driver = criar_driver()
