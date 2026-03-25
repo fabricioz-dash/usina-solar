@@ -12,20 +12,9 @@
 
 <script>
 (function(){
-  const manifest = {
-    name:"Dashboard Solar",short_name:"Solar",
-    description:"Monitor da usina solar",
-    start_url:"./",display:"standalone",
-    background_color:"#0a0e14",theme_color:"#0a0e14",
-    orientation:"portrait-primary",
-    icons:[
-      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"192x192",type:"image/svg+xml"},
-      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"512x512",type:"image/svg+xml"}
-    ]
-  };
+  const manifest={name:"Dashboard Solar",short_name:"Solar",description:"Monitor da usina solar",start_url:"./",display:"standalone",background_color:"#0a0e14",theme_color:"#0a0e14",orientation:"portrait-primary",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"192x192",type:"image/svg+xml"},{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0e14'/><text y='.9em' font-size='85'>☀️</text></svg>",sizes:"512x512",type:"image/svg+xml"}]};
   const blob=new Blob([JSON.stringify(manifest)],{type:"application/manifest+json"});
-  const link=document.createElement("link");link.rel="manifest";
-  link.href=URL.createObjectURL(blob);document.head.appendChild(link);
+  const link=document.createElement("link");link.rel="manifest";link.href=URL.createObjectURL(blob);document.head.appendChild(link);
 })();
 </script>
 
@@ -76,6 +65,18 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:c
 .ref-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:1rem;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s}
 .ref-btn:active{color:var(--blue);border-color:var(--blue)}
 
+/* ABAS PRINCIPAIS */
+.main-tabs{display:flex;background:var(--surface);border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:9}
+.main-tab{flex:1;padding:.7rem .5rem;font-family:var(--hd);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s}
+.main-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.main-panel{display:none}
+.main-panel.active{display:block}
+
+/* BARRA FILTRO */
+.filter-bar{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.filter-bar select{background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.7rem;padding:.4rem .6rem;outline:none;flex:1;-webkit-appearance:none;border-radius:0;cursor:pointer}
+.filter-bar select:focus{border-color:var(--accent)}
+
 /* SCROLL */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .inner{padding:1rem;display:flex;flex-direction:column;gap:1rem;max-width:680px;margin:0 auto}
@@ -104,8 +105,20 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:c
 .card-hd{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-family:var(--hd);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
 .card-hd span{font-size:.65rem;color:var(--blue)}
 
+/* SUB-ABAS (gráficos diários) */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab{flex:1;padding:.6rem .5rem;font-family:var(--hd);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
 /* GRÁFICOS */
 .chart-wrap{position:relative;height:200px;padding:.75rem}
+
+/* BOTÕES PERÍODO (aba mensal) */
+.period-bar{display:flex;gap:.5rem;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.period-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--hd);font-size:.65rem;letter-spacing:.1em;padding:.3rem .75rem;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.period-btn.active{background:var(--accent);border-color:var(--accent);color:#0a0e14}
 
 /* TABELA HISTÓRICO */
 .hist-table{width:100%;border-collapse:collapse}
@@ -131,13 +144,6 @@ footer{text-align:center;padding:.75rem;font-size:.55rem;letter-spacing:.08em;co
 #install-bar{display:none;background:var(--accent);color:#0a0e14;padding:.6rem 1rem;font-size:.7rem;font-family:var(--hd);letter-spacing:.08em;text-transform:uppercase;align-items:center;justify-content:space-between;position:sticky;bottom:0}
 #install-bar.show{display:flex}
 #install-bar button{background:#0a0e14;color:var(--accent);border:none;font-family:var(--hd);font-size:.7rem;padding:.3rem .75rem;cursor:pointer;letter-spacing:.08em}
-
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
-.tab{flex:1;padding:.6rem .5rem;font-family:var(--hd);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
 </style>
 </head>
 <body>
@@ -166,113 +172,163 @@ footer{text-align:center;padding:.75rem;font-size:.55rem;letter-spacing:.08em;co
     </div>
   </header>
 
-  <div class="scroll">
-    <div class="inner">
-
-      <!-- KPI: Rendimento de Hoje -->
-      <div class="kpi-main">
-        <div>
-          <div class="kpi-lbl">Rendimento de Hoje</div>
-          <div class="kpi-main-val" id="kpi-hoje">–<small>kWh</small></div>
-          <div class="kpi-sub" id="kpi-data-ref">–</div>
-        </div>
-        <div class="kpi-main-right">
-          <div class="lbl-sm">Última coleta</div>
-          <div id="kpi-ts" style="font-family:var(--hd);font-size:1rem;color:var(--text);margin-top:.2rem">–</div>
-        </div>
-      </div>
-
-      <!-- KPIs Acumulados -->
-      <div class="kpi-row">
-        <div class="kpi b">
-          <div class="kpi-lbl">Rendimento Total</div>
-          <div class="kpi-val" id="kpi-total">–<small>kWh</small></div>
-          <div class="kpi-sub">Acumulado histórico</div>
-        </div>
-        <div class="kpi a">
-          <div class="kpi-lbl">Potência Acumulada</div>
-          <div class="kpi-val" id="kpi-money">–<small style="font-size:.6rem">R$</small></div>
-          <div class="kpi-sub">Acumulado histórico</div>
-        </div>
-      </div>
-
-      <!-- KPIs derivados -->
-      <div class="kpi-row">
-        <div class="kpi g">
-          <div class="kpi-lbl">Dias coletados</div>
-          <div class="kpi-val" id="kpi-dias">–</div>
-          <div class="kpi-sub">Registros no CSV</div>
-        </div>
-        <div class="kpi g">
-          <div class="kpi-lbl">Média diária</div>
-          <div class="kpi-val" id="kpi-media">–<small>kWh</small></div>
-          <div class="kpi-sub">Últimos 30 dias</div>
-        </div>
-      </div>
-
-      <!-- Gráficos com abas -->
-      <div class="card">
-        <div class="tabs">
-          <button class="tab active" onclick="trocarAba(0)">Rendimento / Dia</button>
-          <button class="tab" onclick="trocarAba(1)">Total Acumulado</button>
-          <button class="tab" onclick="trocarAba(2)">Receita R$</button>
-        </div>
-        <div id="tab0" class="tab-panel active">
-          <div class="chart-wrap"><canvas id="chart-hoje"></canvas></div>
-        </div>
-        <div id="tab1" class="tab-panel">
-          <div class="chart-wrap"><canvas id="chart-total"></canvas></div>
-        </div>
-        <div id="tab2" class="tab-panel">
-          <div class="chart-wrap"><canvas id="chart-money"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Tabela histórico -->
-      <div class="card">
-        <div class="card-hd">Histórico <span id="hist-count"></span></div>
-        <div id="hist-body">
-          <div class="loading"><div class="spin-el"></div>Carregando...</div>
-        </div>
-      </div>
-
-    </div>
-    <footer id="footer">Dashboard Solar · Atualizado via GitHub Actions</footer>
+  <!-- ABAS PRINCIPAIS -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="mtab-diario" onclick="trocarMainTab('diario')">Diário</button>
+    <button class="main-tab"        id="mtab-mensal" onclick="trocarMainTab('mensal')">Mensal</button>
   </div>
+
+  <div class="scroll">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- ABA: DIÁRIO                                -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="main-diario" class="main-panel active">
+
+      <!-- Barra de filtro de mês -->
+      <div class="filter-bar">
+        <select id="filtro-mes" onchange="aplicarFiltro()"></select>
+      </div>
+
+      <div class="inner">
+
+        <!-- KPIs fixos (sempre último registro) -->
+        <div class="kpi-main">
+          <div>
+            <div class="kpi-lbl">Rendimento de Hoje</div>
+            <div class="kpi-main-val" id="kpi-hoje">–<small>kWh</small></div>
+            <div class="kpi-sub" id="kpi-data-ref">–</div>
+          </div>
+          <div class="kpi-main-right">
+            <div class="lbl-sm">Última coleta</div>
+            <div id="kpi-ts" style="font-family:var(--hd);font-size:1rem;color:var(--text);margin-top:.2rem">–</div>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi b">
+            <div class="kpi-lbl">Rendimento Total</div>
+            <div class="kpi-val" id="kpi-total">–<small>kWh</small></div>
+            <div class="kpi-sub">Acumulado histórico</div>
+          </div>
+          <div class="kpi a">
+            <div class="kpi-lbl">Potência Acumulada</div>
+            <div class="kpi-val" id="kpi-money">–<small style="font-size:.6rem">R$</small></div>
+            <div class="kpi-sub">Acumulado histórico</div>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi g">
+            <div class="kpi-lbl">Dias coletados</div>
+            <div class="kpi-val" id="kpi-dias">–</div>
+            <div class="kpi-sub">Registros no CSV</div>
+          </div>
+          <div class="kpi g">
+            <div class="kpi-lbl">Média diária</div>
+            <div class="kpi-val" id="kpi-media">–<small>kWh</small></div>
+            <div class="kpi-sub" id="kpi-media-sub">Últimos 30 dias</div>
+          </div>
+        </div>
+
+        <!-- Gráficos filtrados com sub-abas -->
+        <div class="card">
+          <div class="tabs">
+            <button class="tab active" onclick="trocarSubAba(0)">Rendimento / Dia</button>
+            <button class="tab"        onclick="trocarSubAba(1)">Total Acumulado</button>
+            <button class="tab"        onclick="trocarSubAba(2)">Receita R$</button>
+          </div>
+          <div id="stab0" class="tab-panel active"><div class="chart-wrap"><canvas id="chart-hoje"></canvas></div></div>
+          <div id="stab1" class="tab-panel">        <div class="chart-wrap"><canvas id="chart-total"></canvas></div></div>
+          <div id="stab2" class="tab-panel">        <div class="chart-wrap"><canvas id="chart-money"></canvas></div></div>
+        </div>
+
+        <!-- Tabela histórico filtrada -->
+        <div class="card">
+          <div class="card-hd">Histórico <span id="hist-count"></span></div>
+          <div id="hist-body">
+            <div class="loading"><div class="spin-el"></div>Carregando...</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /main-diario -->
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- ABA: MENSAL                                -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="main-mensal" class="main-panel">
+      <div class="inner">
+
+        <!-- KPIs mensais (do período selecionado) -->
+        <div class="kpi-row">
+          <div class="kpi g">
+            <div class="kpi-lbl">Meses no período</div>
+            <div class="kpi-val" id="kpi-m-meses">–</div>
+          </div>
+          <div class="kpi a">
+            <div class="kpi-lbl">Melhor mês</div>
+            <div class="kpi-val" id="kpi-m-melhor">–<small>kWh</small></div>
+            <div class="kpi-sub" id="kpi-m-melhor-mes">–</div>
+          </div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi b">
+            <div class="kpi-lbl">Média mensal</div>
+            <div class="kpi-val" id="kpi-m-media">–<small>kWh</small></div>
+          </div>
+          <div class="kpi g">
+            <div class="kpi-lbl">Total do período</div>
+            <div class="kpi-val" id="kpi-m-total">–<small>kWh</small></div>
+          </div>
+        </div>
+
+        <!-- Gráfico mensal + botões de período -->
+        <div class="card">
+          <div class="card-hd">Média por Mês <span id="mensal-periodo-label"></span></div>
+          <div class="period-bar">
+            <button class="period-btn active" onclick="trocarPeriodo(12)">12M</button>
+            <button class="period-btn"        onclick="trocarPeriodo(24)">24M</button>
+            <button class="period-btn"        onclick="trocarPeriodo(36)">36M</button>
+            <button class="period-btn"        onclick="trocarPeriodo(0)">Tudo</button>
+          </div>
+          <div class="chart-wrap" style="height:240px"><canvas id="chart-mensal"></canvas></div>
+        </div>
+
+        <!-- Tabela mensal -->
+        <div class="card">
+          <div class="card-hd">Resumo Mensal <span id="mensal-count"></span></div>
+          <div id="mensal-body">
+            <div class="loading"><div class="spin-el"></div>Carregando...</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /main-mensal -->
+
+    <footer id="footer">Dashboard Solar · Atualizado via GitHub Actions</footer>
+  </div><!-- /scroll -->
 
   <div id="install-bar">
     ☀ Instalar como app no celular
     <button id="install-btn">Instalar</button>
   </div>
-</div>
+</div><!-- /app -->
 
 <script>
 // ═══════════════════════════════════════════════════════════
 //  CONFIG — ajuste antes de usar
 // ═══════════════════════════════════════════════════════════
-// URL raw do CSV no GitHub:
-// https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/rendimento_diario.csv
-const CSV_URL = "https://raw.githubusercontent.com/fabricioz-dash/usina-solar/main/rendimento_diario.csv";
-
-// Nome exibido no header
-const NOME_USINA = "Usina Solar";
-
-// Senha: gere com: python3 -c "import hashlib;print(hashlib.sha256(b'SUASENHA').hexdigest())"
+const CSV_URL      = "https://raw.githubusercontent.com/fabricioz-dash/usina-solar/main/rendimento_diario.csv";
+const NOME_USINA   = "Usina Solar";
+// Senha: python3 -c "import hashlib;print(hashlib.sha256(b'SUASENHA').hexdigest())"
 // Padrão abaixo = "solar123"  ← TROQUE!
 const HASH_ESPERADO = "8eb6bc05a0e8f6aad8972595dbce7969343b77b61d6ecd915866a48a555db52a";
 // ═══════════════════════════════════════════════════════════
 
-// PWA install
-if ("serviceWorker" in navigator) {
-  const sw = `
-    const C="solar-csv-v1";
-    self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html"]).catch(()=>{})));self.skipWaiting();});
-    self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
-    self.addEventListener("fetch",e=>{
-      if(e.request.url.includes("raw.githubusercontent.com"))return;
-      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>r)));
-    });
-  `;
+// PWA
+if("serviceWorker" in navigator){
+  const sw=`const C="solar-v2";self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(["./","./index.html"]).catch(()=>{})));self.skipWaiting();});self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener("fetch",e=>{if(e.request.url.includes("raw.githubusercontent.com"))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>r)));});`;
   const blob=new Blob([sw],{type:"text/javascript"});
   navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
 }
@@ -280,18 +336,14 @@ let deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.getElementById("install-bar").classList.add("show");});
 document.getElementById("install-btn").addEventListener("click",()=>{if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById("install-bar").classList.remove("show");});});
 
-// Auth SHA-256
-async function sha256(s){
-  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
+// Auth
+async function sha256(s){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
 async function tentarLogin(){
   const inp=document.getElementById("pwd");
   const hash=await sha256(inp.value);
   if(hash===HASH_ESPERADO){
-    const lock=document.getElementById("lock");
-    lock.classList.add("out");
-    setTimeout(()=>{lock.style.display="none";},500);
+    document.getElementById("lock").classList.add("out");
+    setTimeout(()=>{document.getElementById("lock").style.display="none";},500);
     document.getElementById("app").classList.add("on");
     document.getElementById("plant-name").textContent=NOME_USINA;
     carregarCSV();
@@ -304,46 +356,54 @@ document.getElementById("pwd").addEventListener("keydown",e=>{if(e.key==="Enter"
 document.getElementById("lock-btn").addEventListener("click",tentarLogin);
 document.getElementById("ref-btn").addEventListener("click",carregarCSV);
 
-// Utilitários
+// ── Utilitários ─────────────────────────────────────────────
 const $=id=>document.getElementById(id);
 function fmt(v,d=2){return v==null||isNaN(v)?"–":Number(v).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});}
 function setStatus(tipo,txt){$("dot").className="dot "+tipo;$("status-txt").textContent=txt;}
+function toFloat(s){return parseFloat(String(s).replace(",","."))||0;}
 
-// Parser CSV  (separador ";", header na linha 0)
-function parseCSV(texto) {
-  const linhas = texto.trim().split("\n").filter(l=>l.trim());
-  if (linhas.length < 2) return [];
-  const header = linhas[0].split(";").map(h=>h.trim());
-  return linhas.slice(1).map(l=>{
-    const cols = l.split(";").map(c=>c.trim());
-    const obj  = {};
-    header.forEach((h,i)=>{ obj[h]=cols[i]||""; });
-    return obj;
-  }).filter(r=>r.data && r.rendimento_hoje !== "ERRO" && r.rendimento_hoje !== "ERRO_COLETA");
+// Converte "DD/MM/AAAA" → "AAAA-MM" para agrupamento
+function chaveMes(data){
+  const p=data.split("/");
+  return p.length===3 ? `${p[2]}-${p[1]}` : data;
+}
+// "AAAA-MM" → "Mar/2025"
+const MESES_BR=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+function fmtMes(chave){
+  const[ano,mes]=chave.split("-");
+  return `${MESES_BR[parseInt(mes,10)-1]}/${ano}`;
 }
 
-// Charts
-let charts = {};
-function mkChart(id, labels, data, color, label, tipo="line") {
-  const ctx = $(id).getContext("2d");
-  if (charts[id]) charts[id].destroy();
-  const grad = ctx.createLinearGradient(0,0,0,200);
-  grad.addColorStop(0, color.replace(")",", .35)").replace("rgb","rgba"));
-  grad.addColorStop(1, color.replace(")",", 0)").replace("rgb","rgba"));
-  charts[id] = new Chart(ctx, {
-    type: tipo,
-    data: {
-      labels,
-      datasets:[{
-        label,data,
-        borderColor: color,
-        backgroundColor: tipo==="line" ? grad : color.replace(")",", .6)").replace("rgb","rgba"),
-        borderWidth:2,
-        pointRadius: labels.length > 60 ? 0 : 2,
-        pointBackgroundColor: color,
-        tension: 0.3,fill:true,
-      }]
-    },
+// ── Parser CSV ───────────────────────────────────────────────
+function parseCSV(texto){
+  const linhas=texto.trim().split("\n").filter(l=>l.trim());
+  if(linhas.length<2)return[];
+  const header=linhas[0].split(";").map(h=>h.trim());
+  return linhas.slice(1).map(l=>{
+    const cols=l.split(";").map(c=>c.trim());
+    const obj={};header.forEach((h,i)=>{obj[h]=cols[i]||"";});return obj;
+  }).filter(r=>r.data&&r.rendimento_hoje!=="ERRO"&&r.rendimento_hoje!=="ERRO_COLETA"&&r.rendimento_hoje!=="NAO_ENCONTRADO");
+}
+
+// ── Charts ───────────────────────────────────────────────────
+let charts={};
+function mkChart(id,labels,data,color,labelTxt,tipo="line"){
+  const ctx=$(id).getContext("2d");
+  if(charts[id])charts[id].destroy();
+  const grad=ctx.createLinearGradient(0,0,0,tipo==="line"?200:180);
+  grad.addColorStop(0,color.replace(")",", .35)").replace("rgb","rgba"));
+  grad.addColorStop(1,color.replace(")",", 0)").replace("rgb","rgba"));
+  charts[id]=new Chart(ctx,{
+    type:tipo,
+    data:{labels,datasets:[{
+      label:labelTxt,data,
+      borderColor:color,
+      backgroundColor:tipo==="line"?grad:color.replace(")",", .6)").replace("rgb","rgba"),
+      borderWidth:2,
+      pointRadius:labels.length>60?0:2,
+      pointBackgroundColor:color,
+      tension:0.3,fill:true,
+    }]},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:"index",intersect:false},
@@ -357,84 +417,203 @@ function mkChart(id, labels, data, color, label, tipo="line") {
         }
       },
       scales:{
-        x:{ticks:{color:"#4a5568",font:{family:"'IBM Plex Mono'",size:8},maxTicksLimit:8},grid:{color:"#1e2d3d"}},
+        x:{ticks:{color:"#4a5568",font:{family:"'IBM Plex Mono'",size:8},maxTicksLimit:10},grid:{color:"#1e2d3d"}},
         y:{beginAtZero:true,ticks:{color:"#4a5568",font:{family:"'IBM Plex Mono'",size:8}},grid:{color:"#1e2d3d"}}
       }
     }
   });
 }
 
-// Abas
-function trocarAba(idx){
+// ── Navegação abas principais ────────────────────────────────
+function trocarMainTab(id){
+  ["diario","mensal"].forEach(k=>{
+    $("main-"+k).classList.toggle("active",k===id);
+    $("mtab-"+k).classList.toggle("active",k===id);
+  });
+}
+
+// ── Sub-abas gráficos diários ────────────────────────────────
+function trocarSubAba(idx){
   document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===idx));
   document.querySelectorAll(".tab-panel").forEach((p,i)=>p.classList.toggle("active",i===idx));
 }
 
-// Tabela histórico (mais recente primeiro)
-function renderTabela(rows) {
-  if (!rows.length) { $("hist-body").innerHTML=`<div class="loading">Sem dados</div>`; return; }
-  const invertido = [...rows].reverse();
-  $("hist-count").textContent = `${rows.length} registros`;
-  $("hist-body").innerHTML = `
+// ── Estado global ─────────────────────────────────────────────
+let TODOS_ROWS=[];
+let PERIODO_MESES=12;
+
+// ── Filtro de mês ─────────────────────────────────────────────
+function popularFiltroMes(rows){
+  const meses=[...new Set(rows.map(r=>chaveMes(r.data)))].sort();
+  const sel=$("filtro-mes");
+  const atual=sel.value;
+
+  // Mês atual (hoje)
+  const hoje=new Date();
+  const chaveHoje=`${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,"0")}`;
+
+  sel.innerHTML=`<option value="">Todos os meses</option>`
+    +meses.map(m=>`<option value="${m}">${fmtMes(m)}</option>`).join("");
+
+  // Pré-seleciona o mês atual se disponível, senão o último
+  if(atual)sel.value=atual;
+  else if(meses.includes(chaveHoje))sel.value=chaveHoje;
+  else sel.value=meses[meses.length-1]||"";
+}
+
+function aplicarFiltro(){
+  const mes=$("filtro-mes").value;
+  const rows=mes
+    ? TODOS_ROWS.filter(r=>chaveMes(r.data)===mes)
+    : TODOS_ROWS;
+  renderDiario(rows, mes);
+}
+
+// ── Render aba Diário ─────────────────────────────────────────
+function renderDiario(rows, mesFiltrado){
+  if(!rows.length){
+    $("hist-body").innerHTML=`<div class="loading">Sem dados para este mês</div>`;
+    return;
+  }
+
+  // KPI média: se mês filtrado → média do mês, senão últimos 30 dias
+  const vals=rows.map(r=>toFloat(r.rendimento_hoje)).filter(v=>v>0);
+  const media=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+  $("kpi-media").innerHTML=`${fmt(media,1)}<small>kWh</small>`;
+  $("kpi-media-sub").textContent=mesFiltrado?`Média de ${fmtMes(mesFiltrado)}`:"Últimos 30 dias";
+
+  // Gráficos
+  const labels=rows.map(r=>r.data);
+  mkChart("chart-hoje",  labels, rows.map(r=>toFloat(r.rendimento_hoje)),    "rgb(82,214,138)",  "kWh hoje");
+  mkChart("chart-total", labels, rows.map(r=>toFloat(r.rendimento_total)),   "rgb(61,184,245)",  "kWh total");
+  mkChart("chart-money", labels, rows.map(r=>toFloat(r.potencia_acumulada)), "rgb(245,166,35)",  "R$ acumulado");
+
+  // Tabela (mais recente primeiro)
+  const inv=[...rows].reverse();
+  $("hist-count").textContent=`${rows.length} registros`;
+  $("hist-body").innerHTML=`
     <table class="hist-table">
       <thead><tr>
-        <th>Data</th>
-        <th>Hoje (kWh)</th>
-        <th>Total (kWh)</th>
-        <th>Receita (R$)</th>
+        <th>Data</th><th>Hoje (kWh)</th><th>Total (kWh)</th><th>Receita (R$)</th>
       </tr></thead>
-      <tbody>${invertido.map(r=>`
+      <tbody>${inv.map(r=>`
         <tr>
           <td>${r.data}</td>
-          <td class="val-hoje">${fmt(r.rendimento_hoje)}</td>
-          <td class="val-total">${fmt(r.rendimento_total)}</td>
-          <td class="val-money">${fmt(r.potencia_acumulada)}</td>
+          <td class="val-hoje">${fmt(toFloat(r.rendimento_hoje))}</td>
+          <td class="val-total">${fmt(toFloat(r.rendimento_total))}</td>
+          <td class="val-money">${fmt(toFloat(r.potencia_acumulada))}</td>
         </tr>`).join("")}
       </tbody>
     </table>`;
 }
 
-// Carrega e renderiza tudo
+// ── Render aba Mensal ─────────────────────────────────────────
+function agruparPorMes(rows){
+  const map={};
+  rows.forEach(r=>{
+    const k=chaveMes(r.data);
+    if(!map[k])map[k]={chave:k,valores:[]};
+    const v=toFloat(r.rendimento_hoje);
+    if(v>0)map[k].valores.push(v);
+  });
+  return Object.values(map)
+    .sort((a,b)=>a.chave.localeCompare(b.chave))
+    .map(m=>{
+      const soma=m.valores.reduce((a,b)=>a+b,0);
+      const media=m.valores.length?soma/m.valores.length:0;
+      return{chave:m.chave,label:fmtMes(m.chave),media,soma,dias:m.valores.length};
+    });
+}
+
+function trocarPeriodo(meses){
+  PERIODO_MESES=meses;
+  document.querySelectorAll(".period-btn").forEach(b=>{
+    const bm=parseInt(b.textContent)||0;
+    b.classList.toggle("active", meses===0?b.textContent==="Tudo":bm===meses);
+  });
+  renderMensal(TODOS_ROWS);
+}
+
+function renderMensal(rows){
+  const todos=agruparPorMes(rows);
+  const slice=PERIODO_MESES>0?todos.slice(-PERIODO_MESES):todos;
+
+  if(!slice.length){
+    $("mensal-body").innerHTML=`<div class="loading">Sem dados suficientes</div>`;
+    return;
+  }
+
+  // KPIs mensal
+  $("kpi-m-meses").textContent=slice.length;
+  const medias=slice.map(m=>m.media);
+  const mediaGeral=medias.reduce((a,b)=>a+b,0)/medias.length;
+  const totalPeriodo=slice.reduce((a,m)=>a+m.soma,0);
+  const melhor=slice.reduce((a,b)=>b.media>a.media?b:a);
+  $("kpi-m-media").innerHTML=`${fmt(mediaGeral,1)}<small>kWh</small>`;
+  $("kpi-m-total").innerHTML=`${fmt(totalPeriodo,1)}<small>kWh</small>`;
+  $("kpi-m-melhor").innerHTML=`${fmt(melhor.media,1)}<small>kWh</small>`;
+  $("kpi-m-melhor-mes").textContent=melhor.label;
+  $("mensal-periodo-label").textContent=
+    PERIODO_MESES>0?`Últimos ${PERIODO_MESES} meses`:`${slice.length} meses`;
+
+  // Gráfico
+  mkChart("chart-mensal",
+    slice.map(m=>m.label),
+    slice.map(m=>parseFloat(m.media.toFixed(2))),
+    "rgb(245,166,35)", "kWh/dia médio", "bar"
+  );
+
+  // Tabela
+  $("mensal-count").textContent=`${slice.length} meses`;
+  const inv=[...slice].reverse();
+  $("mensal-body").innerHTML=`
+    <table class="hist-table">
+      <thead><tr>
+        <th>Mês</th><th>Dias</th><th>Média (kWh)</th><th>Total (kWh)</th>
+      </tr></thead>
+      <tbody>${inv.map(m=>`
+        <tr>
+          <td>${m.label}</td>
+          <td style="text-align:right;color:var(--muted)">${m.dias}</td>
+          <td class="val-hoje">${fmt(m.media,1)}</td>
+          <td class="val-total">${fmt(m.soma,1)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+// ── Carregar CSV ──────────────────────────────────────────────
 async function carregarCSV(){
   setStatus("","Buscando...");
-  try {
-    // Cache-bust para sempre pegar a versão mais nova
-    const r = await fetch(CSV_URL + "?v=" + Date.now(), {cache:"no-store"});
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const texto = await r.text();
-    const rows  = parseCSV(texto);
-    if (!rows.length) throw new Error("CSV vazio ou sem dados válidos");
+  try{
+    const r=await fetch(CSV_URL+"?v="+Date.now(),{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const texto=await r.text();
+    const rows=parseCSV(texto);
+    if(!rows.length)throw new Error("CSV vazio ou sem dados válidos");
 
-    // --- Último registro ---
-    const ultimo = rows[rows.length-1];
-    $("kpi-hoje").innerHTML  = `${fmt(ultimo.rendimento_hoje)}<small>kWh</small>`;
-    $("kpi-total").innerHTML = `${fmt(ultimo.rendimento_total)}<small>kWh</small>`;
-    $("kpi-money").innerHTML = `${fmt(ultimo.potencia_acumulada)}<small style="font-size:.6rem">R$</small>`;
-    $("kpi-data-ref").textContent = "Referente a " + ultimo.data;
-    $("kpi-ts").textContent = ultimo.data;
-    $("kpi-dias").textContent = rows.length;
+    TODOS_ROWS=rows;
 
-    // Média últimos 30 dias
-    const ult30 = rows.slice(-30).map(r=>parseFloat(r.rendimento_hoje.replace(",","."))).filter(v=>!isNaN(v));
-    const media = ult30.length ? ult30.reduce((a,b)=>a+b,0)/ult30.length : null;
-    $("kpi-media").innerHTML = `${fmt(media,1)}<small>kWh</small>`;
+    // KPIs fixos (sempre último registro)
+    const ult=rows[rows.length-1];
+    $("kpi-hoje").innerHTML  =`${fmt(toFloat(ult.rendimento_hoje))}<small>kWh</small>`;
+    $("kpi-total").innerHTML =`${fmt(toFloat(ult.rendimento_total))}<small>kWh</small>`;
+    $("kpi-money").innerHTML =`${fmt(toFloat(ult.potencia_acumulada))}<small style="font-size:.6rem">R$</small>`;
+    $("kpi-data-ref").textContent="Referente a "+ult.data;
+    $("kpi-ts").textContent=ult.data;
+    $("kpi-dias").textContent=rows.length;
 
-    // Dados para gráficos — usa todas as datas se ≤90, senão últimas 90
-    const slice = rows.slice(-90);
-    const labels = slice.map(r=>r.data);
-    const dHoje  = slice.map(r=>parseFloat(r.rendimento_hoje.replace(",","."))||0);
-    const dTotal = slice.map(r=>parseFloat(r.rendimento_total.replace(",","."))||0);
-    const dMoney = slice.map(r=>parseFloat(r.potencia_acumulada.replace(",","."))||0);
+    // Popular filtro e renderizar aba diária
+    popularFiltroMes(rows);
+    aplicarFiltro();
 
-    mkChart("chart-hoje",  labels, dHoje,  "rgb(82,214,138)",   "kWh hoje");
-    mkChart("chart-total", labels, dTotal, "rgb(61,184,245)",   "kWh total","line");
-    mkChart("chart-money", labels, dMoney, "rgb(245,166,35)",   "R$ acumulado","line");
+    // Renderizar aba mensal
+    renderMensal(rows);
 
-    renderTabela(rows);
     setStatus("online","Atualizado");
-    $("footer").textContent = `Dashboard Solar · ${NOME_USINA} · ${new Date().toLocaleDateString("pt-BR")}`;
+    $("footer").textContent=`Dashboard Solar · ${NOME_USINA} · ${new Date().toLocaleDateString("pt-BR")}`;
 
-  } catch(e) {
+  }catch(e){
     setStatus("erro","Erro ao carregar");
     $("hist-body").innerHTML=`<div class="loading" style="color:var(--danger)">
       ⚠ Não foi possível carregar o CSV<br>
